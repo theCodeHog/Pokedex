@@ -18,9 +18,7 @@ public class UserService {
 
     public List<User> findAll(String username) {
         if(username != null){
-            //var user :User =
             return (List<User>) userRepository.findByUsername(username).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Could not find the user by username %s.", username)));
-            //return List.of(user);
         }
         return userRepository.findAll();
     }
