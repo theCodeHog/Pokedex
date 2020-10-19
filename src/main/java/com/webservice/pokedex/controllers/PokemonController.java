@@ -8,15 +8,17 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Optional;
+
 @RestController
-@RequestMapping("/rest")
+@RequestMapping("/rest/v1/pokemon")
 public class PokemonController {
 
     @Autowired
     PokemonService pokemonService;
 
-    @GetMapping("/pokemon/{id}")
-    public Pokemon getPokemonById(@PathVariable String id) {
+    @GetMapping("/{id}")
+    public Optional<Pokemon> getPokemonById(@PathVariable String id) {
         return pokemonService.findById(id);
     }
 
