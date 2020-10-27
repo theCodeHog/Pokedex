@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -15,15 +16,16 @@ public class PokemonController {
     @Autowired
     private PokemonService pokemonService;
 
-    @GetMapping()
-    public ResponseEntity<Pokemon> findPokemon(@RequestParam String name){
-        var pokemon = pokemonService.search(name);
-        return ResponseEntity.ok(pokemon);
+    //find pokemon by name or id
+    @GetMapping("/{name}")
+    public ResponseEntity<List<Pokemon>> findPokemon(@PathVariable String name){
+        List<Pokemon> pokemons = (List<Pokemon>) pokemonService.search(name);
+        return ResponseEntity.ok(pokemons);
     }
 
-    @GetMapping("/{id}")
+    /*@GetMapping("/{id}")
     public Optional<Pokemon> getPokemonById(@PathVariable String id) {
         return pokemonService.findById(id);
-    }
+    }*/
 
 }

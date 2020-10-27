@@ -1,36 +1,26 @@
-package com.webservice.pokedex.entities;
+package com.webservice.pokedex.dto;
 
-import org.springframework.data.annotation.Id;
 import java.util.List;
 
-public class Pokemon {
-    //id's in MongoDb are stored as ObjectIds (uuid)
-    @Id
-    private String id;
+public class PokemonDto {
+    //DTO = Data Transfer Object
+
     private String name;
     private Object species;
     private int weight;
     private int height;
     private List<Object> abilities;
 
-    public Pokemon(){}
+    public PokemonDto(){}
 
-    public Pokemon(String id, String name, Object species, int weight, int height,
+    public PokemonDto(String name, Object species, int weight, int height,
                    List<Object> abilities) {
-        this.id = id;
+
         this.name = name;
         this.species = species;
         this.weight = weight;
         this.height = height;
         this.abilities = abilities;
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
     }
 
     public String getName() {
@@ -72,4 +62,5 @@ public class Pokemon {
     public void setAbilities(List<Object> abilities) {
         this.abilities = abilities;
     }
+
 }
