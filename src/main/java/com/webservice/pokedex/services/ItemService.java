@@ -13,7 +13,7 @@ import java.util.List;
 
 public class ItemService {
     private final RestTemplate restTemplate;
-    private String url = "https://pokeapi.co/api/v2/pokemon/";
+    private String url = "https://pokeapi.co/api/v2/item/";
 
     //constructor, setter
     public ItemService(RestTemplateBuilder restTemplateBuilder) {
