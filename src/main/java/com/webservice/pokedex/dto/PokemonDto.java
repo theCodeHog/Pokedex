@@ -2,8 +2,9 @@ package com.webservice.pokedex.dto;
 
 import java.util.List;
 
+//DTO = Data Transfer Object
 public class PokemonDto {
-    //DTO = Data Transfer Object
+
     private String id;
     private String name;
     private Object species;
@@ -13,9 +14,8 @@ public class PokemonDto {
 
     public PokemonDto(){}
 
-    public PokemonDto(String id, String name, Object species, int weight, int height,
+    public PokemonDto(String name, Object species, int weight, int height,
                    List<Object> abilities) {
-
         this.name = name;
         this.species = species;
         this.weight = weight;
