@@ -27,6 +27,7 @@ public class PokemonService {
     @Autowired
     PokemonRepository pokemonRepository;
 
+
     public PokemonService(RestTemplateBuilder restTemplateBuilder) {
         this.restTemplate = restTemplateBuilder.build();
     }
