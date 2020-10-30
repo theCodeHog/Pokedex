@@ -17,40 +17,40 @@ public class UserController {
     @Autowired
     private UserService userService;
 
-    //find all users OR one user by username
-    @GetMapping //?username=
-    @Secured("ROLE_USER")
-    public ResponseEntity<List<User>> findAllUsers(@RequestParam(required = false) String username){
-        var users = userService.findAll(username);
+    //find all users
+    @GetMapping
+    //@Secured("ROLE_USER")
+    public ResponseEntity<List<User>> findAllUsers(){
+        var users = userService.findAll();
         return ResponseEntity.ok(users);
     }
 
     @GetMapping("/{id}")
-    @Secured("ROLE_ADMIN")
+    //@Secured("ROLE_ADMIN")
     public ResponseEntity<User> findUserById(@PathVariable String id){
         return ResponseEntity.ok(userService.findById(id));
     }
 
     @GetMapping("/username/{username}")
-    public User findUserByUsername(@PathVariable String username){
-        return userService.findByUsername(username);
+    public ResponseEntity<User> findUserByUsername(@PathVariable String username){
+        return ResponseEntity.ok(userService.findByUsername(username));
     }
 
     @PostMapping
-    @Secured("ROLE_ADMIN")
+    //@Secured("ROLE_ADMIN")
     public ResponseEntity<User> saveUser(@Validated @RequestBody User user){//@Validated checks the @NOT_EMPTY and such in User Entity
         return ResponseEntity.ok(userService.save(user));
     }
 
     @PutMapping("/{id}")
-    @Secured("ROLE_ADMIN")
+    //@Secured("ROLE_ADMIN")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void updateUser(@PathVariable String id, @RequestBody User user){
         userService.update(id, user);
     }
 
     @DeleteMapping("/{id}")
-    @Secured("ROLE_ADMIN")
+    //@Secured("ROLE_ADMIN")
     @ResponseStatus(HttpStatus.NO_CONTENT) //204
     public void deleteUser(@PathVariable String id){
         userService.delete(id);

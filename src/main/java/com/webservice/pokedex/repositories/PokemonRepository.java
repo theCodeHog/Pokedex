@@ -10,5 +10,8 @@ import java.util.List;
 public interface PokemonRepository extends MongoRepository<Pokemon, String> {
 
     public List<Pokemon> findAllByName(String name);
+    public List<Pokemon> findAllByWeight(String weight);
+    public List<Pokemon> findAllByHeight(String height);
+    public List<Pokemon> findAllByAbilities(String abilities);
 
 }

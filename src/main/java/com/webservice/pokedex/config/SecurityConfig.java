@@ -24,6 +24,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Autowired
     private UserDetailService userDetailService;
 
+    public SecurityConfig() {
+    }
+
     @Autowired
     public void configure(AuthenticationManagerBuilder auth) throws Exception{
         auth.inMemoryAuthentication()

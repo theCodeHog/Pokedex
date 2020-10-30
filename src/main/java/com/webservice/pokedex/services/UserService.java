@@ -18,10 +18,7 @@ public class UserService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    public List<User> findAll(String username) {
-        if(username != null){
-            return (List<User>) userRepository.findByUsername(username).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Could not find the user by username %s.", username)));
-        }
+    public List<User> findAll() {
         return userRepository.findAll();
     }
 
@@ -30,7 +27,8 @@ public class UserService {
     }
 
     public User findByUsername(String username){
-        return userRepository.findByUsername(username).orElseThrow(RuntimeException::new);
+        var user = userRepository.findByUsername(username);
+        return user.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Could not find the user by username %s.", username)));
     }
 
     public User save(User user){

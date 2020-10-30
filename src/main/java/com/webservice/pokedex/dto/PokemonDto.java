@@ -4,7 +4,7 @@ import java.util.List;
 
 public class PokemonDto {
     //DTO = Data Transfer Object
-
+    private String id;
     private String name;
     private Object species;
     private int weight;
@@ -13,7 +13,7 @@ public class PokemonDto {
 
     public PokemonDto(){}
 
-    public PokemonDto(String name, Object species, int weight, int height,
+    public PokemonDto(String id, String name, Object species, int weight, int height,
                    List<Object> abilities) {
 
         this.name = name;
@@ -21,6 +21,14 @@ public class PokemonDto {
         this.weight = weight;
         this.height = height;
         this.abilities = abilities;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 
     public String getName() {
