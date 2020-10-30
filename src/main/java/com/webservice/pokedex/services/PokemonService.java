@@ -11,7 +11,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -19,6 +18,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Service
+//whats this do???
 @ConfigurationProperties(value = "pokemon.url", ignoreUnknownFields = false)
 public class PokemonService {
     private final RestTemplate restTemplate;

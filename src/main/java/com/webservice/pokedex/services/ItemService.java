@@ -6,11 +6,13 @@ import com.webservice.pokedex.repositories.ItemRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
+@Service
 public class ItemService {
     private final RestTemplate restTemplate;
     private String url = "https://pokeapi.co/api/v2/item/";
