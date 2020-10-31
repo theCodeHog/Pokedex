@@ -5,10 +5,7 @@ import com.webservice.pokedex.services.PokemonService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/rest/v1/pokemon")
@@ -18,9 +15,9 @@ public class PokemonController {
     private PokemonService pokemonService;
 
     //find pokemon by name or id
-    @GetMapping("/{name}")
-    public ResponseEntity<List<Pokemon>> findPokemon(@PathVariable String name){
-        List<Pokemon> pokemons = (List<Pokemon>) pokemonService.search(name);
+    @GetMapping("/{nameOrId}")
+    public ResponseEntity<List<Pokemon>> findPokemon(@PathVariable String nameOrId) throws NoSuchFieldException, IllegalAccessException {
+        List<Pokemon> pokemons = (List<Pokemon>) pokemonService.search(nameOrId);
         return ResponseEntity.ok(pokemons);
     }
 
@@ -33,7 +30,7 @@ public class PokemonController {
 
     //search for pokemon with four parameters (ex: name=sand and height>30, weight>30, abilities.name=push)
 
-    @GetMapping()
+    @GetMapping("/pokemons") // /pokemons?name=raticate?height=7?weight=185?abilities=run-away
     public ResponseEntity<List<Pokemon>> getPokemonbyNameHeightWeightAbilities(
             @RequestParam(required = false) String name,
             @RequestParam(required = false) String height,

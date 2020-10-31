@@ -18,10 +18,10 @@ public class ItemController {
     @Autowired
     private ItemService itemService;
 
-    //Get item by name //or id????
-    @GetMapping("/{name}")
-    public ResponseEntity<List<Item>> findItemByName(@PathVariable String name){
-        List<Item> items = (List<Item>) itemService.searchByName(name);
+    //Get item by name or id
+    @GetMapping("/{nameOrId}")
+    public ResponseEntity<List<Item>> findItemByName(@PathVariable String nameOrId){
+        List<Item> items = (List<Item>) itemService.searchByNameOrId(nameOrId);
         return ResponseEntity.ok(items);
     }
 

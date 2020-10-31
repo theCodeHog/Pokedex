@@ -28,10 +28,10 @@ public class ItemService {
     @Autowired
     private ItemRepository itemRepository;
 
-    public List<Item> searchByName(String name){
-        var urlWithTitleQuery = url + name;
+    public List<Item> searchByNameOrId(String nameOrId){
+        var urlWithTitleQuery = url + nameOrId;
 
-        var items = itemRepository.findAllByName(name);
+        var items = itemRepository.findAllByName(nameOrId);
 
         if(items.isEmpty()){
             var itemDto = restTemplate.getForObject(urlWithTitleQuery, ItemDto.class);

@@ -11,9 +11,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
+import java.lang.reflect.Field;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -22,7 +21,7 @@ import java.util.stream.Stream;
 @ConfigurationProperties(value = "pokemon.url", ignoreUnknownFields = false)
 public class PokemonService {
     private final RestTemplate restTemplate;
-    private String url = "https://pokeapi.co/api/v2/pokemon/";
+    private String url = "https://pokeapi.co/api/v2/pokemon";
 
     @Autowired
     PokemonRepository pokemonRepository;
@@ -36,29 +35,43 @@ public class PokemonService {
         this.url = url;
     }
 
-    public List<Pokemon> search(String name){
-        var urlWithTitleQuery = url + name;
+    public List<Pokemon> search(String name) throws NoSuchFieldException, IllegalAccessException {
+        //var urlWithTitleQuery = url + "/" + name;
+        var urlWithAllPokemons = url + "?limit=2000";
+        var pokemons = new ArrayList<Pokemon>();
 
-        //check the database
-        var pokemons = pokemonRepository.findAllByName(name);
-        //if the pokemon doesn't exist in the db - check PokeApi
-        if(pokemons.isEmpty()){
-            System.out.println("no pokemon in db");
-            var pokemonDto = restTemplate.getForObject(urlWithTitleQuery, PokemonDto.class);
-            //if pokemon not found on PokeApi throw exception
-            if(pokemonDto == null){
-                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No pokemon found.");
-            } //if found create new pokemon and save to db
-            else {
-                var newPokemon = new Pokemon(
-                        pokemonDto.getId(),
-                        pokemonDto.getName(),
-                        pokemonDto.getSpecies(),
-                        pokemonDto.getWeight(),
-                        pokemonDto.getHeight(),
-                        pokemonDto.getAbilities()
-                );
-                pokemons.add(this.save(newPokemon));
+        //get all pokemon names in a single map
+        var allPokemonNames = (Map<String, List<Object>>)restTemplate.getForObject(urlWithAllPokemons, Object.class);
+        if (allPokemonNames != null) {
+            var arrayOfNames = allPokemonNames.get("results");
+            for (Object x : arrayOfNames) {
+                var pokemonName = ((LinkedHashMap) x).get("name").toString();
+                if (pokemonName.contains(name)) {
+                    var pokemon = pokemonRepository.findAllByName(pokemonName);
+                    //if the pokemon doesn't exist in the db - check PokeApi
+                    if (pokemon.isEmpty()) {
+                        var pokemonUrl = ((LinkedHashMap) x).get("url").toString();
+                        var pokemonDto = restTemplate.getForObject(pokemonUrl, PokemonDto.class);
+                        //if pokemon not found on PokeApi throw exception
+                        if (pokemonDto == null) {
+                            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No pokemon found.");
+                        } //if found create new pokemon and save to db
+                        else {
+                            var newPokemon = new Pokemon(
+                                    pokemonDto.getId(),
+                                    pokemonDto.getName(),
+                                    pokemonDto.getSpecies(),
+                                    pokemonDto.getWeight(),
+                                    pokemonDto.getHeight(),
+                                    pokemonDto.getAbilities()
+                            );
+                            pokemons.add(this.save(newPokemon));
+                        }
+
+                    } else {
+                        pokemons.addAll(pokemon);
+                    }
+                }
             }
         }
         return pokemons;
@@ -89,3 +102,4 @@ public class PokemonService {
     }
 
 }
+
