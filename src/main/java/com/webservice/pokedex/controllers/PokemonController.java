@@ -26,19 +26,24 @@ public class PokemonController {
         return pokemonService.findById(id);
     }*/
 
-    //search with partial string name
-
     //search for pokemon with four parameters (ex: name=sand and height>30, weight>30, abilities.name=push)
 
-    @GetMapping("/pokemons") // /pokemons?name=raticate?height=7?weight=185?abilities=run-away
+    @GetMapping("/pokemons") // /pokemons?name=raticate&height=7&weight=185&abilities=run-away
     public ResponseEntity<List<Pokemon>> getPokemonbyNameHeightWeightAbilities(
-            @RequestParam(required = false) String name,
+            @RequestParam String name, //you -have- to search by name - based on how PokeApi works
             @RequestParam(required = false) String height,
             @RequestParam(required = false) String weight,
             @RequestParam(required = false) String abilities ){
         List<Pokemon> pokemons = pokemonService.searchByMultipleThings(name, height, weight, abilities);
         return ResponseEntity.ok(pokemons);
     }
+
+    /*
+
+    public String saveUser(@RequestParam Map<String,String> requestParams) throws Exception{
+   String userName=requestParams.get("email");
+   String password=requestParams.get("password");
+     */
 
     /*
     @GetMapping("/users") // /rest/users?name=johan
