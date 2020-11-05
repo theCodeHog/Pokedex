@@ -1,7 +1,6 @@
 package com.webservice.pokedex.entities;
 
 import org.springframework.data.annotation.Id;
-
 import java.util.List;
 
 public class Location {

@@ -4,6 +4,8 @@ import com.webservice.pokedex.entities.User;
 import com.webservice.pokedex.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -17,6 +19,8 @@ public class UserService {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+
 
     public List<User> findAll() {
         return userRepository.findAll();
@@ -41,8 +45,23 @@ public class UserService {
 
     public void update(String id, User user){
         if(!userRepository.existsById(id)){
-            throw new RuntimeException();
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Could not find the following id: %s", id));
         }
+
+
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        System.out.println(principal);
+        String username = ((UserDetails)principal).getUsername();
+
+
+
+        System.out.println(username);
+        System.out.println(user.getUsername()); //is null?
+
+        if(!username.equals(user.getUsername())){
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "You are not allowed here!");
+        }
+
         user.setId(id);
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         userRepository.save(user);
@@ -50,7 +69,7 @@ public class UserService {
 
     public void delete(String id){
         if(!userRepository.existsById(id)){
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Could not find the user by id %s.", id));
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Could not find the following id %s.", id));
         }
         userRepository.deleteById(id);
     }

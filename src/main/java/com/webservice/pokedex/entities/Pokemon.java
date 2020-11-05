@@ -4,7 +4,7 @@ import org.springframework.data.annotation.Id;
 import java.util.List;
 
 public class Pokemon {
-    //id's in MongoDb are stored as ObjectIds (uuid)
+
     @Id
     private String id;
     private String name;
@@ -12,17 +12,19 @@ public class Pokemon {
     private int weight;
     private int height;
     private List<Object> abilities;
+    private List<PokemonType> pokemonTypes;
 
     public Pokemon(){}
 
     public Pokemon(String id, String name, Object species, int weight, int height,
-                   List<Object> abilities) {
+                   List<Object> abilities, List<PokemonType> pokemonTypes) {
         this.id = id;
         this.name = name;
         this.species = species;
         this.weight = weight;
         this.height = height;
         this.abilities = abilities;
+        this.pokemonTypes = pokemonTypes;
     }
 
     public String getId() {
@@ -71,5 +73,13 @@ public class Pokemon {
 
     public void setAbilities(List<Object> abilities) {
         this.abilities = abilities;
+    }
+
+    public List<PokemonType> getPokemonTypes() {
+        return pokemonTypes;
+    }
+
+    public void setPokemonTypes(List<PokemonType> pokemonTypes) {
+        this.pokemonTypes = pokemonTypes;
     }
 }

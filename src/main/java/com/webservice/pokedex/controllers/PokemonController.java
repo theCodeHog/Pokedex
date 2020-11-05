@@ -14,44 +14,23 @@ public class PokemonController {
     @Autowired
     private PokemonService pokemonService;
 
-    //find pokemon by name or id
-    @GetMapping("/{nameOrId}")
-    public ResponseEntity<List<Pokemon>> findPokemon(@PathVariable String nameOrId) throws NoSuchFieldException, IllegalAccessException {
-        List<Pokemon> pokemons = (List<Pokemon>) pokemonService.search(nameOrId);
-        return ResponseEntity.ok(pokemons);
+    //find pokemon by name or other parameters?
+    @GetMapping("/{name}")
+    public ResponseEntity<List<Pokemon>> findPokemon(@PathVariable String name) throws NoSuchFieldException, IllegalAccessException {
+        List<Pokemon> pokemons = pokemonService.search(name);
+        return ResponseEntity.ok(pokemons); //Returns statuscode 200
     }
-
-    /*@GetMapping("/{id}")
-    public Optional<Pokemon> getPokemonById(@PathVariable String id) {
-        return pokemonService.findById(id);
-    }*/
 
     //search for pokemon with four parameters (ex: name=sand and height>30, weight>30, abilities.name=push)
 
-    @GetMapping("/pokemons") // /pokemons?name=raticate&height=7&weight=185&abilities=run-away
-    public ResponseEntity<List<Pokemon>> getPokemonbyNameHeightWeightAbilities(
+    @GetMapping("/pokemons") // /pokemons?name=raticate&height=7&weight=185&type=normal
+    public ResponseEntity<List<Pokemon>> getPokemonbyNameHeightWeightType(
             @RequestParam String name, //you -have- to search by name - based on how PokeApi works
             @RequestParam(required = false) String height,
             @RequestParam(required = false) String weight,
-            @RequestParam(required = false) String abilities ){
-        List<Pokemon> pokemons = pokemonService.searchByMultipleThings(name, height, weight, abilities);
-        return ResponseEntity.ok(pokemons);
+            @RequestParam(required = false) String type ){
+        List<Pokemon> pokemons = pokemonService.searchByMultipleThings(name, height, weight, type);
+        return ResponseEntity.ok(pokemons); //Returns statuscode 200
     }
-
-    /*
-
-    public String saveUser(@RequestParam Map<String,String> requestParams) throws Exception{
-   String userName=requestParams.get("email");
-   String password=requestParams.get("password");
-     */
-
-    /*
-    @GetMapping("/users") // /rest/users?name=johan
-    public List<User> getUserWithName(@RequestParam(required = false) String name){
-        return userService.findUsers(name);
-    }*/
-
-
-
 
 }

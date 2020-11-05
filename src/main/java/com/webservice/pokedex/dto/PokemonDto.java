@@ -1,5 +1,7 @@
 package com.webservice.pokedex.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.webservice.pokedex.entities.PokemonType;
 import java.util.List;
 
 //DTO = Data Transfer Object
@@ -11,16 +13,18 @@ public class PokemonDto {
     private int weight;
     private int height;
     private List<Object> abilities;
+    private List<PokemonType> types;
 
     public PokemonDto(){}
 
     public PokemonDto(String name, Object species, int weight, int height,
-                   List<Object> abilities) {
+                   List<Object> abilities, List<PokemonType> types) {
         this.name = name;
         this.species = species;
         this.weight = weight;
         this.height = height;
         this.abilities = abilities;
+        this.types = types;
     }
 
     public String getId() {
@@ -71,4 +75,11 @@ public class PokemonDto {
         this.abilities = abilities;
     }
 
+    public List<PokemonType> getTypes() {
+        return types;
+    }
+
+    public void setTypes(List<PokemonType> types) {
+        this.types = types;
+    }
 }

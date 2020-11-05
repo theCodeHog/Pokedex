@@ -2,6 +2,7 @@ package com.webservice.pokedex.services;
 
 import com.webservice.pokedex.dto.PokemonDto;
 import com.webservice.pokedex.entities.Pokemon;
+import com.webservice.pokedex.entities.PokemonType;
 import com.webservice.pokedex.repositories.PokemonRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -10,8 +11,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.server.ResponseStatusException;
-
-import java.lang.reflect.Type;
 import java.util.*;
 
 @Service
@@ -40,15 +39,12 @@ public class PokemonService {
         return pokemonsByName;
     }
 
-    public List<Pokemon> searchByMultipleThings(String name, String weight, String height, String abilities) {
+    public List<Pokemon> searchByMultipleThings(String name, String weight, String height, String type) {
 
-        System.out.println(name + " " + weight + " " + height + " " + abilities);
+        System.out.println(name + " " + weight + " " + height + " " + type);
 
         int pokemonWeight = Integer.parseInt(weight);
-        System.out.println(pokemonWeight);
-
         int pokemonHeight = Integer.parseInt(height);
-        System.out.println(pokemonHeight);
 
         List<Pokemon> pokemonsByName = this.searchForPokemonNamesByPartialString(name);
         List<Pokemon> pokemonsByWeight;
@@ -62,14 +58,14 @@ public class PokemonService {
             if (!pokemonsByWeight.isEmpty()) {
                 pokemonsByHeight = this.searchForPokemonByHeight(pokemonsByWeight, pokemonHeight);
 
-                //if we have pokemons by height search by abilities next
+                //if we have pokemons by height search by type next
                 if (!pokemonsByHeight.isEmpty()){
-                    searchResults = this.searchForPokemonByAbilities(pokemonsByHeight, abilities);
+                    searchResults = this.searchForPokemonByType(pokemonsByHeight, type);
                 }
 
-                //if we don't have pokemons by height search by abilities next
+                //if we don't have pokemons by height search by type next
                 else {
-                    searchResults = this.searchForPokemonByAbilities(pokemonsByWeight, abilities);
+                    searchResults = this.searchForPokemonByType(pokemonsByWeight, type);
                 }
 
             }
@@ -77,14 +73,14 @@ public class PokemonService {
             else {
                 pokemonsByHeight = this.searchForPokemonByHeight(pokemonsByName, pokemonHeight);
 
-                //if we have pokemons by height search by abilities next
+                //if we have pokemons by height search by type next
                 if (!pokemonsByHeight.isEmpty()){
-                    searchResults = this.searchForPokemonByAbilities(pokemonsByHeight, abilities);
+                    searchResults = this.searchForPokemonByType(pokemonsByHeight, type);
                 }
 
-                //if we don't have pokemons by height search by abilities next
+                //if we don't have pokemons by height search by type next
                 else {
-                    searchResults = this.searchForPokemonByAbilities(pokemonsByWeight, abilities);
+                    searchResults = this.searchForPokemonByType(pokemonsByWeight, type);
                 }
 
             }
@@ -93,7 +89,6 @@ public class PokemonService {
 
         throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No pokemon found.");
     }
-
 
     private Pokemon save(Pokemon pokemon) {
         return pokemonRepository.save(pokemon);
@@ -112,12 +107,13 @@ public class PokemonService {
         //check if allPokemonNames contains data - then get detail info of each pokemon (either from db or pokeApi)
         if (allPokemonNames != null) {
             for (Object x : allPokemonNames) {
-                var pokemonName = ((LinkedHashMap) x).get("name").toString();
+                var pokemonMap = (LinkedHashMap) x;
+                var pokemonName = pokemonMap.get("name").toString();
                 if (pokemonName.contains(name)) {
                     var pokemon = this.findPokemonInDb(pokemonName);
                     //if the pokemon doesn't exist in the db - check PokeApi
                     if (pokemon.isEmpty()) {
-                        var pokemonUrl = ((LinkedHashMap) x).get("url").toString();
+                        var pokemonUrl = pokemonMap.get("url").toString();
                         var pokemonDto = restTemplate.getForObject(pokemonUrl, PokemonDto.class);
                         //if pokemon not found on PokeApi throw exception
                         if (pokemonDto == null) {
@@ -130,11 +126,11 @@ public class PokemonService {
                                     pokemonDto.getSpecies(),
                                     pokemonDto.getWeight(),
                                     pokemonDto.getHeight(),
-                                    pokemonDto.getAbilities()
+                                    pokemonDto.getAbilities(),
+                                    pokemonDto.getTypes()
                             );
                             pokemons.add(this.save(newPokemon));
                         }
-
                     } else {
                         pokemons.addAll(pokemon);
                     }
@@ -164,31 +160,26 @@ public class PokemonService {
         return pokemonsByHeight;
     }
 
-    private List<Pokemon> searchForPokemonByAbilities(List<Pokemon> pokemons, String abilities){
-        List<Pokemon> pokemonsByAbilities = new ArrayList<>();
-
+    private List<Pokemon> searchForPokemonByType(List<Pokemon> pokemons, String type){
+        List<Pokemon> pokemonsByType = new ArrayList<>();
         for (Pokemon pokemon : pokemons ){
-            System.out.println(pokemon.getAbilities());
-            System.out.println(abilities);
-            if ( pokemon.getAbilities().contains(abilities) ) {
-                pokemonsByAbilities.add(pokemon);
+            var pokemonTypes = pokemon.getPokemonTypes();
+            for (PokemonType pokemonType : pokemonTypes) {
+                var pokemonTypeName = pokemonType.getType().getName();
+                if (pokemonTypeName.contains(type)) {
+                    pokemonsByType.add(pokemon);
+                }
             }
         }
-        return pokemonsByAbilities;
+        return pokemonsByType;
     }
 
     private List<Object> getAllPokemonNamesAndUrls(String urlWithAllPokemons) {
         var allPokemonNames = (Map<String, List<Object>>) restTemplate.getForObject(urlWithAllPokemons, Object.class);
             if(allPokemonNames !=null){
-                var arrayOfNames = allPokemonNames.get("results");
-                return arrayOfNames;
+                return allPokemonNames.get("results");
             }
             return null;
-    }
-
-    public Pokemon findById(String id){
-        return pokemonRepository.findById(id).orElseThrow(() ->
-                new ResponseStatusException(HttpStatus.NOT_FOUND, "No pokemon found."));
     }
 
 }

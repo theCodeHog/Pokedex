@@ -4,6 +4,7 @@ import com.webservice.pokedex.services.UserDetailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -24,15 +25,13 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Autowired
     private UserDetailService userDetailService;
 
-    public SecurityConfig() {
-    }
-
     @Autowired
     public void configure(AuthenticationManagerBuilder auth) throws Exception{
-        auth.inMemoryAuthentication()
+        auth.userDetailsService(userDetailService);
+        /*auth.inMemoryAuthentication()
                 .withUser("admin")
                 .password(passwordEncoder().encode("password")) //admin:password https://www.base64encode.org/ Basic + result from website
-                .roles("USER");
+                .roles("USER", "ADMIN");*/
     }
 
     @Override
@@ -40,9 +39,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         httpSecurity
                 .csrf().disable()
                 .formLogin().disable()
-                //.authorizeRequests().anyRequest().authenticated()
-                .authorizeRequests().antMatchers("/open").permitAll()
-                .antMatchers("/api/**").authenticated()
+                .authorizeRequests()
+                .antMatchers(HttpMethod.GET, "/rest/v1/pokemon").permitAll()
+                .antMatchers(HttpMethod.GET, "/rest/v1/item").permitAll()
+                .antMatchers(HttpMethod.GET, "/rest/v1/location").permitAll()
+                .antMatchers("/api").authenticated()
                 .and()
                 .httpBasic().authenticationEntryPoint(entrypoint)
                 .and()
@@ -55,3 +56,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     }
 
 }
+
+
+
