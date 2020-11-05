@@ -68,7 +68,7 @@ public class UserController {
             @ApiResponse(responseCode = "200", description = "Created the user succesfully.",
                     content = { @Content(mediaType = "application/json",
                             schema = @Schema(implementation = User.class)) }),
-            @ApiResponse(responseCode = "404", description = "User not found", //TODO: test this one
+            @ApiResponse(responseCode = "418", description = "I am a teapot. (Cannot create a user without a password)",
                     content = @Content) })
     @PostMapping
     @Secured("ROLE_ADMIN")
