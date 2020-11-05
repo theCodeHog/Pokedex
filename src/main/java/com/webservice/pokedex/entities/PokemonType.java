@@ -1,8 +1,12 @@
 package com.webservice.pokedex.entities;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 public class PokemonType {
 
+    @Schema(description = "Index number", example = "1")
     private int slot;
+    @Schema(description = "Type of the pokemon, i.e. dark, normal")
     private Type type;
 
     public PokemonType(){}

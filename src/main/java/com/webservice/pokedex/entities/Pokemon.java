@@ -1,17 +1,25 @@
 package com.webservice.pokedex.entities;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import org.springframework.data.annotation.Id;
 import java.util.List;
 
 public class Pokemon {
 
     @Id
+    @Schema(description = "Id of the pokemon", example = "20")
     private String id;
+    @Schema(description = "Name of the pokemon", example = "raticate")
     private String name;
+    @Schema(description = "Species of the pokemon, i.e. raticate")
     private Object species;
+    @Schema(description = "Weight of the pokemon", example = "185")
     private int weight;
+    @Schema(description = "Height of the pokemon", example = "7")
     private int height;
+    @Schema(description = "Abilities the pokemon has, i.e. run-away, guts, hustle")
     private List<Object> abilities;
+    @Schema(description = "What types exist of this pokemon, i.e. normal, dark")
     private List<PokemonType> pokemonTypes;
 
     public Pokemon(){}

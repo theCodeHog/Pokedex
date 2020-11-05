@@ -1,8 +1,12 @@
 package com.webservice.pokedex.entities;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 public class Type {
 
+    @Schema(description = "Name of the pokemon type", example = "normal")
     private String name;
+    @Schema(description = "Url of the pokemon type", example = "https://pokeapi.co/api/v2/type/1/")
     private String url;
 
     public Type() {}
