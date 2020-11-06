@@ -16,7 +16,7 @@ import org.springframework.security.web.AuthenticationEntryPoint;
 
 @Configuration
 @EnableWebSecurity
-@EnableGlobalMethodSecurity(securedEnabled = true) //we use @Secured in the controller - so we activate it here
+@EnableGlobalMethodSecurity(securedEnabled = true) //activates @Secured in the controller
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Autowired
@@ -40,6 +40,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .csrf().disable()
                 .formLogin().disable()
                 .authorizeRequests()
+                .antMatchers(HttpMethod.GET, "/").permitAll()
                 .antMatchers(HttpMethod.GET, "/rest/v1/pokemon").permitAll()
                 .antMatchers(HttpMethod.GET, "/rest/v1/item").permitAll()
                 .antMatchers(HttpMethod.GET, "/rest/v1/location").permitAll()

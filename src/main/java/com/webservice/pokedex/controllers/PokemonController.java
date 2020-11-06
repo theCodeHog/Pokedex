@@ -20,27 +20,33 @@ public class PokemonController {
     @Autowired
     private PokemonService pokemonService;
 
-    @Operation(summary = "Get all pokemon by name OR height OR weight OR type")
+    @Operation(summary = "Get ONE pokemon by name OR id")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Found pokemon",
                     content = { @Content(mediaType = "application/json",
                             schema = @Schema(implementation = Pokemon.class)) }),
             @ApiResponse(responseCode = "404", description = "No pokemon found",
                     content = @Content) })
-    @GetMapping("/{name}")
-    public ResponseEntity<List<Pokemon>> findPokemon(@Parameter(description = "name of pokemon to be searched")@PathVariable String name) {
-        List<Pokemon> pokemons = pokemonService.search(name);
-        return ResponseEntity.ok(pokemons);
+    @GetMapping("/{nameOrId}")
+    public ResponseEntity<Pokemon> findOnePokemonByNameOrId(@Parameter(description = "name or id of pokemon to be searched")@PathVariable String nameOrId) {
+        Pokemon pokemon = pokemonService.findByNameOrId(nameOrId);
+        return ResponseEntity.ok(pokemon);
     }
 
-
-    @GetMapping("/pokemons") // /pokemons?name=raticate&height=7&weight=185&type=normal
-    public ResponseEntity<List<Pokemon>> getPokemonbyNameHeightWeightType(
+    @Operation(summary = "Get ALL pokemon by name AND/OR height AND/OR weight AND/OR type")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "pokemon found!",
+                    content = { @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = Pokemon.class)) }),
+            @ApiResponse(responseCode = "404", description = "No pokemon found",
+                    content = @Content) })
+    @GetMapping() // /rest/v1/pokemon?name=raticate&weight=185&height=7&type=normal
+    public ResponseEntity<List<Pokemon>> getPokemonByNameHeightWeightType(
             @RequestParam String name, //you -have- to search by name - based on how PokeApi works
-            @RequestParam(required = false) String height,
-            @RequestParam(required = false) String weight,
+            @RequestParam(required = false) Integer minWeight,
+            @RequestParam(required = false) Integer minHeight,
             @RequestParam(required = false) String type ){
-        List<Pokemon> pokemons = pokemonService.searchByMultipleThings(name, height, weight, type);
+        List<Pokemon> pokemons = pokemonService.searchByNameWeightHeightType(name, minWeight, minHeight, type);
         return ResponseEntity.ok(pokemons);
     }
 

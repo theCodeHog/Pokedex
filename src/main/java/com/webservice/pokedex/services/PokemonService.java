@@ -33,61 +33,87 @@ public class PokemonService {
         this.url = url;
     }
 
-    //Search for pokemon
-    public List<Pokemon> search(String name) {
-        var pokemonsByName = this.searchForPokemonNamesByPartialString(name);
-        return pokemonsByName;
+    //Search for ONE pokemon
+    public Pokemon findByNameOrId(String nameOrId) {
+        var urlWithTitleQuery = url + "/" + nameOrId;
+
+        var pokemon = findPokemonInDb(nameOrId);
+
+        if (pokemon.isEmpty()) {
+            var pokemonDto = restTemplate.getForObject(urlWithTitleQuery, PokemonDto.class);
+            if (pokemonDto == null) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No pokemon found.");
+            } else {
+                var newPokemon = createNewPokemon(pokemonDto);
+                pokemon.add(this.save(newPokemon));
+            }
+        }
+        return pokemon.get(0);
     }
 
-    public List<Pokemon> searchByMultipleThings(String name, String weight, String height, String type) {
-
-        System.out.println(name + " " + weight + " " + height + " " + type);
-
-        int pokemonWeight = Integer.parseInt(weight);
-        int pokemonHeight = Integer.parseInt(height);
-
+    //Search ALL pokemon
+    public List<Pokemon> searchByNameWeightHeightType(String name, Integer minWeight, Integer minHeight, String type) {
         List<Pokemon> pokemonsByName = this.searchForPokemonNamesByPartialString(name);
         List<Pokemon> pokemonsByWeight;
         List<Pokemon> pokemonsByHeight;
-        List<Pokemon> searchResults;
+        List<Pokemon> pokemonsByType;
 
-        if (!pokemonsByName.isEmpty()) { // if we have pokemons by name search by weight next
-            pokemonsByWeight = this.searchForPokemonByWeight(pokemonsByName, pokemonWeight);
+        if ((!pokemonsByName.isEmpty()) && (minWeight != null)) {
+            pokemonsByWeight = this.searchForPokemonByWeight(pokemonsByName, minWeight);
 
-            // if we have pokemons by weight search by height next
-            if (!pokemonsByWeight.isEmpty()) {
-                pokemonsByHeight = this.searchForPokemonByHeight(pokemonsByWeight, pokemonHeight);
+            if ((!pokemonsByWeight.isEmpty()) && (minHeight != null)) {
+                pokemonsByHeight = this.searchForPokemonByHeight(pokemonsByWeight, minHeight);
 
-                //if we have pokemons by height search by type next
+                if ((!pokemonsByHeight.isEmpty()) && (type != null)) {
+                    pokemonsByType = this.searchForPokemonByType(pokemonsByHeight, type);
+                    if (!pokemonsByType.isEmpty()){
+                        return pokemonsByType;
+                    }
+                }
+                if ((pokemonsByHeight.isEmpty()) && (type != null)) {
+                    pokemonsByType = this.searchForPokemonByType(pokemonsByWeight, type);
+                    if (!pokemonsByType.isEmpty()){
+                        return pokemonsByType;
+                    }
+                }
                 if (!pokemonsByHeight.isEmpty()){
-                    searchResults = this.searchForPokemonByType(pokemonsByHeight, type);
+                    return pokemonsByHeight;
                 }
-
-                //if we don't have pokemons by height search by type next
-                else {
-                    searchResults = this.searchForPokemonByType(pokemonsByWeight, type);
-                }
-
             }
-                //if we don't have pokemons by weight search by height next
-            else {
-                pokemonsByHeight = this.searchForPokemonByHeight(pokemonsByName, pokemonHeight);
+            if ((pokemonsByWeight.isEmpty()) && (minHeight != null)) {
+                pokemonsByHeight = this.searchForPokemonByHeight(pokemonsByName, minHeight);
 
-                //if we have pokemons by height search by type next
+                if ((!pokemonsByHeight.isEmpty()) && (type != null)) {
+                    pokemonsByType = this.searchForPokemonByType(pokemonsByHeight, type);
+                    if (!pokemonsByType.isEmpty()){
+                        return pokemonsByType;
+                    }
+                }
+                if ((pokemonsByHeight.isEmpty()) && (type != null)) {
+                    pokemonsByType = this.searchForPokemonByType(pokemonsByName, type);
+                    if (!pokemonsByType.isEmpty()){
+                        return pokemonsByType;
+                    }
+                }
                 if (!pokemonsByHeight.isEmpty()){
-                    searchResults = this.searchForPokemonByType(pokemonsByHeight, type);
+                    return pokemonsByHeight;
                 }
-
-                //if we don't have pokemons by height search by type next
-                else {
-                    searchResults = this.searchForPokemonByType(pokemonsByWeight, type);
-                }
-
             }
-            return searchResults;
+
+            if (!pokemonsByWeight.isEmpty() && (type != null)){
+                pokemonsByType = this.searchForPokemonByType(pokemonsByWeight, type);
+                if (!pokemonsByType.isEmpty()){
+                    return pokemonsByType;
+                }
+            }
+            if (!pokemonsByWeight.isEmpty()){
+                return pokemonsByWeight;
+            }
         }
-
-        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No pokemon found.");
+        if (pokemonsByName.isEmpty()){
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No pokemon found, make a better query!");
+        }
+        return pokemonsByName;
     }
 
     private Pokemon save(Pokemon pokemon) {
@@ -102,6 +128,7 @@ public class PokemonService {
         var pokemons = new ArrayList<Pokemon>();
 
         //get all pokemon names in a single map
+        //this checks everytime if pokeAPI has added a new pokemon to search with
         var allPokemonNames = this.getAllPokemonNamesAndUrls(urlWithAllPokemons);
 
         //check if allPokemonNames contains data - then get detail info of each pokemon (either from db or pokeApi)
@@ -120,15 +147,7 @@ public class PokemonService {
                             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No pokemon found.");
                         } //if found create new pokemon and save to db
                         else {
-                            var newPokemon = new Pokemon(
-                                    pokemonDto.getId(),
-                                    pokemonDto.getName(),
-                                    pokemonDto.getSpecies(),
-                                    pokemonDto.getWeight(),
-                                    pokemonDto.getHeight(),
-                                    pokemonDto.getAbilities(),
-                                    pokemonDto.getTypes()
-                            );
+                            Pokemon newPokemon = createNewPokemon(pokemonDto);
                             pokemons.add(this.save(newPokemon));
                         }
                     } else {
@@ -140,37 +159,49 @@ public class PokemonService {
         return pokemons;
     }
 
-    private List<Pokemon> searchForPokemonByWeight(List<Pokemon> pokemons, int weight){
+    private Pokemon createNewPokemon(PokemonDto pokemonDto){
+        return new Pokemon(
+                pokemonDto.getId(),
+                pokemonDto.getName(),
+                pokemonDto.getSpecies(),
+                pokemonDto.getWeight(),
+                pokemonDto.getHeight(),
+                pokemonDto.getAbilities(),
+                pokemonDto.getTypes()
+        );
+    }
+
+    private List<Pokemon> searchForPokemonByWeight(List<Pokemon> pokemons, int minWeight){
         List<Pokemon> pokemonsByWeight = new ArrayList<>();
-        for (Pokemon pokemon : pokemons ){
-            if ( pokemon.getWeight() >= weight ) {
-                pokemonsByWeight.add(pokemon);
+            for (Pokemon pokemon : pokemons) {
+                if (pokemon.getWeight() >= minWeight) {
+                    pokemonsByWeight.add(pokemon);
+                }
             }
-        }
         return pokemonsByWeight;
     }
 
-    private List<Pokemon> searchForPokemonByHeight(List<Pokemon> pokemons, int height){
+    private List<Pokemon> searchForPokemonByHeight(List<Pokemon> pokemons, int minHeight){
         List<Pokemon> pokemonsByHeight = new ArrayList<>();
-        for (Pokemon pokemon : pokemons ){
-            if ( pokemon.getHeight() >= height ) {
-                pokemonsByHeight.add(pokemon);
+            for (Pokemon pokemon : pokemons) {
+                if (pokemon.getHeight() >= minHeight) {
+                    pokemonsByHeight.add(pokemon);
+                }
             }
-        }
         return pokemonsByHeight;
     }
 
     private List<Pokemon> searchForPokemonByType(List<Pokemon> pokemons, String type){
         List<Pokemon> pokemonsByType = new ArrayList<>();
-        for (Pokemon pokemon : pokemons ){
-            var pokemonTypes = pokemon.getPokemonTypes();
-            for (PokemonType pokemonType : pokemonTypes) {
-                var pokemonTypeName = pokemonType.getType().getName();
-                if (pokemonTypeName.contains(type)) {
-                    pokemonsByType.add(pokemon);
+            for (Pokemon pokemon : pokemons) {
+                var pokemonTypes = pokemon.getPokemonTypes();
+                for (PokemonType pokemonType : pokemonTypes) {
+                    var pokemonTypeName = pokemonType.getType().getName();
+                    if (pokemonTypeName.contains(type)) {
+                        pokemonsByType.add(pokemon);
+                    }
                 }
             }
-        }
         return pokemonsByType;
     }
 
