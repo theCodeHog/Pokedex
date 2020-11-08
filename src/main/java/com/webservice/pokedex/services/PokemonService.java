@@ -14,7 +14,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.*;
 
 @Service
-@ConfigurationProperties(value = "pokemon.url", ignoreUnknownFields = false) //whats this do???
+@ConfigurationProperties(value = "pokemon.url", ignoreUnknownFields = false)
 public class PokemonService {
     private final RestTemplate restTemplate;
     private String url = "https://pokeapi.co/api/v2/pokemon";

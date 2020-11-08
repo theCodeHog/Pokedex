@@ -77,9 +77,10 @@ public class UserController {
     }
 
     @Operation(summary = "Update a user")
-    @ApiResponses(value = {@ApiResponse(responseCode = "204", description = "Updated the user succesfully. No content to return.")})
+    @ApiResponses(value = {@ApiResponse(responseCode = "204", description = "Updated the user succesfully. No content to return.", content = @Content),
+            @ApiResponse(responseCode = "401", description = "Not authorized", content = @Content)} )
     @PutMapping("/{id}")
-    @Secured({"ROLE_ADMIN", "ROLE_USER"})
+    @Secured({"ROLE_USER", "ROLE_ADMIN"})
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void updateUser(@Parameter(description = "id of user to be updated") @PathVariable String id, @RequestBody User user){
         userService.update(id, user);
